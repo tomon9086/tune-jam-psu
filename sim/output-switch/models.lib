@@ -1,0 +1,7 @@
+* 近似モデル（データシートの代表値に合わせた手作り。メーカー提供ではない）
+* AO3400A: 30V, Vth ~1.05V, Rds(on) ~20mOhm@10V / ~30mOhm@4.5V, Ciss ~630pF
+.model AO3400A VDMOS(Vto=1.05 Kp=20 Rd=7m Rs=7m Rg=2 Cgdmax=250p Cgdmin=40p Cgs=500p Cjo=150p Is=1e-11 Rb=15m BV=30)
+* BAV99 の 1 素子分
+.model BAV99 D(Is=2.5n N=1.75 Rs=0.6 Cjo=1.5p Tt=4n Bv=100 Ibv=1u)
+* MMSZ5240B（10V ツェナー）
+.model Z10V D(Is=1e-14 N=1 Rs=10 Cjo=50p Bv=10 Ibv=5m)

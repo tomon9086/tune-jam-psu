@@ -1,0 +1,29 @@
+* reverse blocking: switch OFF, external 15V on output
+.include models.lib
+VIN vin 0 20
+VB buck 0 5
+RB buck bout 5m
+CB bout 0 44u
+VPWM pwm 0 PULSE(0 3.3 0 20n 20n 4.98u 10u)
+C1 pwm a 100n
+D1 vin a BAV99
+D2 a cp BAV99
+C2 cp vin 100n
+RG cp g 100k
+DZ s g Z10V
+M1 bout g s AO3400A
+M2 out g s AO3400A
+SOFF g 0 ctl 0 SWOFF
+VCTL ctl 0 1
+.model SWOFF SW(Ron=20 Roff=1G Vt=0.5 Vh=0.1)
+VEXT ext 0 15
+REXT ext out 1
+.tran 50n 0.5m 0 100n uic
+.control
+run
+meas tran irev AVG i(VB) from=0.3m to=0.5m
+meas tran vout AVG v(out) from=0.3m to=0.5m
+let vgs=v(g)-v(s)
+meas tran vgsr AVG vgs from=0.3m to=0.5m
+.endc
+.end
