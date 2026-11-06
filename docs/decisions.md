@@ -32,10 +32,11 @@
 
 ## 3. 環境についてのメモ（Claude Code のクラウドセッション）
 
-- この環境から `lcsc.com`、`jlcpcb.com`、`ti.com`、`jlcsearch.tscircuit.com`、`*.github.io`（JLC 部品 DB のミラー）、`flux.ai` へのアクセスは、ネットワーク設定で拒否される（curl も WebFetch も不可）。使えるのは WebSearch のスニペットだけなので、価格・在庫・区分は「キャッシュの値」として扱い、発注前にユーザーに確認してもらう。環境のネットワーク設定で `jlcpcb.com` などを許可すれば、直接調べられる
-- `raw.githubusercontent.com` と `pypi.org` には届く
-- ネットワーク設定はスマホのアプリからは変更できない（ユーザー談、11-05）。PC のブラウザから設定してもらうまで、JLC/LCSC のデータは WebSearch のスニペットで代用する
-- 作業ブランチ：`claude/requirements-v0.2`（main は初期コミットと要件定義書 v0.1 のみ）
+- 2026-11-06 にネットワーク設定が更新され、`jlcpcb.com`、`lcsc.com`（`wmsc.lcsc.com` を含む）、`www.ti.com`、`cdfer.github.io` に Bash（サンドボックス）から届くようになった。**スクレイピングはサンドボックスから行う**（ユーザーの指示）。WebFetch は名前解決できないことがあるので、curl か Python を使う
+- ネットワーク設定はスマホのアプリからは変更できない（ユーザー談）。PC のブラウザから行う
+- 取得の手順は `docs/parts-selection.md` の 7 章
+- ngspice は `apt-get install -y ngspice` で入る（ngspice-42）。コンテナが作り直されると消えるので、毎回入れ直す
+- 作業ブランチ：`claude/requirements-v0.2`
 
 ## 4. 次の作業
 
