@@ -25,6 +25,20 @@
 - circuit-synth の回路図は、1 枚の図でも「階層ラベル」を使うので、KiCad の ERC がエラーにする。`(hierarchical_label` を `(global_label` に置き換えると消える（接続は正しい）
 - atopile と EasyEDA MCP は、「回路図を人がレビューする」「`kicad-cli` で ERC を回す」という条件（MFG-07〜09、VER-01）を満たせないので、試作前に外した
 
+## 接続の突き合わせ（往復チェック）
+
+`tools/verify/netlist_diff.py` で、意図した接続（`expected_nets.json`）と、KiCad の回路図から `kicad-cli sch export netlist` で出したネットリストを比べた。ネット名ではなく「どのピンどうしが同じネットか」を比べる。
+
+| ネット | circuit-synth | tscircuit |
+|---|---|---|
+| VIN、+5V、+3V3、SW、BOOT、VCC、FB | OK | OK（VIN の D1 は下記） |
+| GND | **OK（10 ピン）** | **NG：C5 の 2 番ピンが未接続** |
+
+- 最初、circuit-synth の GND で「U1.9 が余分」と出たが、これは LMR33630 の放熱パッドで、期待値に書き忘れていた。GND で正しい
+- tscircuit の D1 が VIN と GND で逆に出るのは、tscircuit のダイオードの 1 番ピンがアノードという番号の決め方の違いで、接続の誤りではない
+- 回路図の見た目では、circuit-synth は線ではなく電源記号（GND の記号）でつないでいるので、つながっていないように見えることがある（`circuit_synth_c5.png`）。tscircuit は、C5 から出た線が実際にどこにもつながっていない（`tscircuit_c5.png`）
+- 画像どうしの差分は、2 つのツールで部品の配置がまったく違うので使えない。比べるべきは接続（ネットリスト）
+
 ## 推奨
 
 **circuit-synth を使い、次の 2 つを検証パイプラインに入れる**
@@ -38,4 +52,6 @@
 
 - `skidl_aux.py`、`tscircuit_aux.circuit.tsx`、`circuit_synth_aux.py`：評価に使ったコード
 - `circuit_synth_schematic.png`、`tscircuit_schematic.png`：KiCad で SVG に書き出した回路図
+- `circuit_synth_c5.png`、`tscircuit_c5.png`：C5 の周りの拡大
+- `expected_nets.json`：往復チェックの期待値
 - 注意：`tscircuit_aux.circuit.tsx` の LMR33630 のピン配置は、評価のために手で書いたもので、データシートとは照合していない
