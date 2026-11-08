@@ -30,6 +30,7 @@
 | D21 | CC は (B) 外付けループ（LMR33630 ＋ INA180 ＋ MCP6002）（Q1） | LMR33630 は 0.8V まで出せて、最小オン時間で周波数を下げるので、ほぼ 0Ω の負荷まで CC が効く見込み。Basic の TPS5430 だと 12V 入力で約 1.3〜9.3V しか出せず、低い抵抗で CC が効かない | 11-08 |
 | D22 | 出力スイッチは AO3400A × 2 のバックツーバック＋MCU の PWM で作るチャージポンプ（Q9） | P-FET は 0.8V 出力で ON にできない。ngspice で 0.8〜12V の ON、約 0.5µs の OFF、逆流 3nA を確認（`sim/output-switch/`）。FW が止まると OFF になるので安全側 | 11-08 |
 | D23 | 5V 固定出力の保護部品（SY6280）は付けない（FIX-03） | 短絡しても降圧 IC の電流制限で壊れない。MCU が再起動するが VAR は OFF で立ち上がる。5V 固定出力は「ついで」なので Extended を増やす価値がない。ユーザーの判断 | 11-08 |
+| D24 | シャントは JLC の Basic の 100mΩ 1206 を 4 本並列（25mΩ）にし、電流センスアンプを INA180A2（50V/V）にする。手はんだの部品は秋月と DigiKey の両方から買えるものを優先する | 秋月に 10mΩ のリード抵抗がない。Basic の並列なら追加料金も手はんだも要らない。ユーザーの希望（両方から調達したい） | 11-08 |
 
 ## 2. コストの概算（2026-11 時点・未検証の値を含む）
 
@@ -44,13 +45,15 @@
 - 2026-11-06 にネットワーク設定が更新され、`jlcpcb.com`、`lcsc.com`（`wmsc.lcsc.com` を含む）、`www.ti.com`、`cdfer.github.io` に Bash（サンドボックス）から届くようになった。**スクレイピングはサンドボックスから行う**（ユーザーの指示）。WebFetch は名前解決できないことがあるので、curl か Python を使う
 - ネットワーク設定はスマホのアプリからは変更できない（ユーザー談）。PC のブラウザから行う
 - 取得の手順は `docs/parts-selection.md` の 7 章
+- 2026-11-08 に `akizukidenshi.com`、`www.digikey.jp`、`www.digikey.com` を許可した。秋月は検索ページ（`/catalog/goods/search.aspx?search=x&keyword=...`）を読める。DigiKey は Cloudflare のボット対策ページが返るので、**回避はせず** Web 検索で確認する
 - ngspice は `apt-get install -y ngspice` で入る（ngspice-42）。コンテナが作り直されると消えるので、毎回入れ直す
 - 作業ブランチ：`claude/requirements-v0.2`
 
 ## 4. 次の作業
 
 1. **部品選定（P1）：ほぼ完了**（`docs/parts-selection.md`。2026-11-08 に DC 入力で確定、0 章）
-   - 残り：THT 部品（インダクタ、シャント、NTC、DC ジャック）の具体的な品番と入手先、逆接保護の方式（P-FET かショットキー）、受動部品の品番
+   - 手はんだ部品の調達先（秋月と DigiKey）：NTC は 103AT-2 で両方にある。インダクタ（秋月 7G14C-100M-R）と DC ジャック（秋月 MJ-179PH / DigiKey PJ-002AH）は共通の型番がなく、P3 で両方に合う穴の配置を検討する（`docs/parts-selection.md` 0.2 節）
+   - 残り：逆接保護の方式（P-FET かショットキー）、受動部品の品番
    - LMR33630 の SPICE モデルの残課題（周波数が 250kHz になる、1.9ms で止まる、FB 注入での 0.8V が起動しない）は P1.5 で扱う
 2. **回路図ツールの評価（Q7）**：選んだ部品（降圧 1 つ程度の小さな回路）で各ツールを試し、KiCad まで通して `kicad-cli` で ERC が回せるか確認する
 3. **検証パイプラインの構築（P1.5）**：`tools/spice/pspice2ngspice.py` と `sim/output-switch/` を組み込む
