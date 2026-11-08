@@ -48,6 +48,7 @@
 - 取得の手順は `docs/parts-selection.md` の 7 章
 - 2026-11-08 に `akizukidenshi.com`、`www.digikey.jp`、`www.digikey.com` を許可した。秋月は検索ページ（`/catalog/goods/search.aspx?search=x&keyword=...`）を読める。DigiKey は Cloudflare のボット対策ページが返るので、**回避はせず** Web 検索で確認する
 - ngspice は `apt-get install -y ngspice` で入る（ngspice-42）。コンテナが作り直されると消えるので、毎回入れ直す
+- KiCad 9 は公式 PPA から入れる（Ubuntu 標準の KiCad 7 には `kicad-cli sch erc` がない）。`ppa.launchpadcontent.net`、`api.launchpad.net`、`keyserver.ubuntu.com` を許可済み。この環境では `add-apt-repository` が動かない（python3 が 3.13 のため）ので、鍵（指紋 FDA854F61C4D0D9572BB95E5245D5502FAD7A805）と sources.list を手で登録して `apt-get install -y --no-install-recommends kicad kicad-symbols kicad-footprints`。そのあと `/usr/share/kicad/template/` の `sym-lib-table` と `fp-lib-table` を `~/.config/kicad/9.0/` にコピーする
 - 作業ブランチ：`claude/requirements-v0.2`
 
 ## 4. 次の作業
@@ -56,5 +57,5 @@
    - 手はんだ部品の調達先（秋月と DigiKey）：NTC は 103AT-2 で両方にある。インダクタ（秋月 7G14C-100M-R）と DC ジャック（秋月 MJ-179PH / DigiKey PJ-002AH）は共通の型番がなく、P3 で両方に合う穴の配置を検討する（`docs/parts-selection.md` 0.2 節）
    - 残り：逆接保護の方式（P-FET かショットキー）、受動部品の品番
    - LMR33630 の SPICE モデルの残課題（周波数が 250kHz になる、1.9ms で止まる、FB 注入での 0.8V が起動しない）は P1.5 で扱う
-2. **回路図ツールの評価（Q7）**：選んだ部品（降圧 1 つ程度の小さな回路）で各ツールを試し、KiCad まで通して `kicad-cli` で ERC が回せるか確認する
+2. **回路図ツールの評価（Q7）：評価済み、ユーザーの確認待ち**（`eval/q7-schematic-tools/README.md`）。推奨は circuit-synth（KiCad 標準シンボルを使い、接続が正しく、ERC が本当の指摘だけを出す）。tscircuit は KiCad 変換で接続が抜けるバグがあった。SKiDL は回路図を出せない。atopile と EasyEDA MCP は条件を満たさない
 3. **検証パイプラインの構築（P1.5）**：`tools/spice/pspice2ngspice.py` と `sim/output-switch/` を組み込む
