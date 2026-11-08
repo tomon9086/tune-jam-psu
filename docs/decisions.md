@@ -32,6 +32,7 @@
 | D23 | 5V 固定出力の保護部品（SY6280）は付けない（FIX-03） | 短絡しても降圧 IC の電流制限で壊れない。MCU が再起動するが VAR は OFF で立ち上がる。5V 固定出力は「ついで」なので Extended を増やす価値がない。ユーザーの判断 | 11-08 |
 | D24 | シャントは JLC の Basic の 100mΩ 1206 を 4 本並列（25mΩ）にし、電流センスアンプを INA180A2（50V/V）にする。手はんだの部品は秋月と DigiKey の両方から買えるものを優先する | 秋月に 10mΩ のリード抵抗がない。Basic の並列なら追加料金も手はんだも要らない。ユーザーの希望（両方から調達したい） | 11-08 |
 | D25 | D24 を修正：シャントは 100mΩ 1206 の 3 本並列（33mΩ）、電流センスアンプは INA180A1（20V/V）。パワーインダクタは JLC で SRP7028A-100M を付ける。DC ジャック（MJ-179PH）と NTC（103AT-2）は秋月で買って手はんだ | 3 本なら熱に余裕があり、A1 なら 3A でも 5V で飽和しない。インダクタは秋月（¥1,600）より JLC（約 ¥720〜940）が安く、低背。DC ジャックと NTC は秋月の方が安い（`docs/parts-selection.md` 0.2 節）。ユーザーが同意 | 11-08 |
+| D26 | 回路図ツールは circuit-synth（Q7）。生成後にラベルの種類を置き換える後処理と、往復チェック（`tools/verify/netlist_diff.py`）を検証パイプラインに入れる | 同じ回路で比べ、接続がすべて正しく KiCad に入り、ERC が本当の指摘だけを出した。tscircuit は KiCad 変換で接続が抜けた。SKiDL は回路図を出せない。ユーザーが同意 | 11-08 |
 
 ## 2. コストの概算（2026-11 時点・未検証の値を含む）
 
@@ -57,5 +58,5 @@
    - 手はんだ部品の調達先（秋月と DigiKey）：NTC は 103AT-2 で両方にある。インダクタ（秋月 7G14C-100M-R）と DC ジャック（秋月 MJ-179PH / DigiKey PJ-002AH）は共通の型番がなく、P3 で両方に合う穴の配置を検討する（`docs/parts-selection.md` 0.2 節）
    - 残り：逆接保護の方式（P-FET かショットキー）、受動部品の品番
    - LMR33630 の SPICE モデルの残課題（周波数が 250kHz になる、1.9ms で止まる、FB 注入での 0.8V が起動しない）は P1.5 で扱う
-2. **回路図ツールの評価（Q7）：評価済み、ユーザーの確認待ち**（`eval/q7-schematic-tools/README.md`）。推奨は circuit-synth（KiCad 標準シンボルを使い、接続が正しく、ERC が本当の指摘だけを出す）。tscircuit は KiCad 変換で接続が抜けるバグがあった。SKiDL は回路図を出せない。atopile と EasyEDA MCP は条件を満たさない
-3. **検証パイプラインの構築（P1.5）**：`tools/spice/pspice2ngspice.py` と `sim/output-switch/` を組み込む
+2. **回路図ツール（Q7）：決定（D26、circuit-synth）**
+3. **検証パイプラインの構築（P1.5）：次にやる**。circuit-synth のバージョン固定と後処理、往復チェック、ERC、`tools/spice/pspice2ngspice.py`、`sim/output-switch/` を 1 コマンドで回せるようにする。`tools/spice/pspice2ngspice.py` と `sim/output-switch/` を組み込む
