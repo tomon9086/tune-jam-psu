@@ -5,10 +5,10 @@
     kicad-cli sch export netlist -o out.net 回路図.kicad_sch
     python3 tools/verify/netlist_diff.py 期待値.json out.net
 
-期待値.json は {"ネット名": ["U1.2", "C1.1", ...], ...} の形。
+期待値.json は {"ネット名": ["U1.2", "C1.1", ...], ...} の形（hw/build.py が build/hw/expected_nets.json に出す）。
 ネット名は比べず、「どのピンどうしが同じネットにいるか」（ピンの分け方）だけを比べる。
 未接続のピン（KiCad が unconnected-(...) と名付けるネット）は、期待値に書かなければ無視する。
-差分があれば終了コード 1 を返す。
+KiCad 側に意図していない接続がないかも逆向きに調べる。差分があれば終了コード 1 を返す。
 """
 import json
 import re
@@ -48,6 +48,14 @@ def main():
             ok = False
             detail = "、".join(f"{k} に {v}" for k, v in got.items())
             print(f"NG  {name}: 分かれている → {detail}")
+    # 逆向き：KiCad 側のネットに、意図していないピンどうしの接続がないか
+    exp_pin2net = {p: n for n, ps in expected.items() for p in ps}
+    for kname, pins in sorted(actual.items()):
+        groups = {exp_pin2net.get(p, "(期待値にない)") for p in pins}
+        if len(groups) > 1 or "(期待値にない)" in groups:
+            ok = False
+            print(f"NG  KiCad のネット {kname} に、意図していない接続がある：{sorted(pins)}")
+    print("往復チェック：" + ("一致" if ok else "不一致あり"))
     sys.exit(0 if ok else 1)
 
 

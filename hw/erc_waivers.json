@@ -1,0 +1,10 @@
+[
+ {"type": "pin_not_connected", "contains": "U1 Pin 4 [PG",
+  "reason": "5V 降圧の PG は使わない。circuit-synth 0.12.1 は未接続の印を出せない（意図は往復チェックで確認）"},
+ {"type": "power_pin_not_driven", "contains": "U1 Pin 2 [VIN",
+  "reason": "VIN は DC ジャック J1 から来る。circuit-synth 0.12.1 は PWR_FLAG を書き出せない"},
+ {"type": "power_pin_not_driven", "contains": "U1 Pin 1 [GND",
+  "reason": "GND は DC ジャック J1 から来る。circuit-synth 0.12.1 は PWR_FLAG を書き出せない"},
+ {"type": "power_pin_not_driven", "contains": "U2 Pin 3 [VI",
+  "reason": "+5V はインダクタ L1（passive）経由で降圧から来る。circuit-synth 0.12.1 は PWR_FLAG を書き出せない"}
+]
