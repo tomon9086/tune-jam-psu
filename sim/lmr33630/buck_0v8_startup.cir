@@ -1,0 +1,24 @@
+* U08 0.8V FB injection uic
+.include models/lmr33630a_ng.lib
+VIN vin 0 20
+CIN vin 0 10u
+X1 0 boot en fb pg 0 sw vcc vin LMR33630A_TRANS
+REN vin en 100k
+CBOOT boot sw 100n
+CVCC vcc 0 1u
+RPG pg vcc 100k
+L1 sw out 10u
+COUT out 0 44u
+RFBT out fb 100k
+RFBB fb 0 9.09k
+RLOAD out 0 0.4
+VCTL ctl 0 PWL(0 1.0 4.5m 1.0 5.0m 3.296)
+RINJ ctl fb 20.5k
+
+.save v(out) i(L1) v(sw) v(fb) v(x1.u2_ss_int)
+.tran 10n 7.5m 0 20n uic
+.control
+run
+wrdata U08b.txt v(out) i(L1) v(sw) v(fb) v(x1.u2_ss_int)
+.endc
+.end
