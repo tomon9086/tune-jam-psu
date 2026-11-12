@@ -20,6 +20,7 @@ STEPS = [
     ("VER-01 ERC", ["python3", "tools/verify/erc_check.py", SCH, "hw/erc_waivers.json"]),
     ("ネットリストの出力", ["kicad-cli", "sch", "export", "netlist", "-o", "build/hw/kicad.net", SCH]),
     ("VER-03f 往復チェック", ["python3", "tools/verify/netlist_diff.py", "build/hw/expected_nets.json", "build/hw/kicad.net"]),
+    ("VER-06 VAR の定数", ["python3", "hw/calc/var_network.py"]),
     ("VER-05 BOM", ["python3", "tools/verify/bom_check.py", "build/hw/components.json", *STRICT]),
     ("VER-07 出力スイッチ", ["python3", "sim/output-switch/check.py"]),
 ]
