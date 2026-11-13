@@ -25,6 +25,54 @@ OUT = ROOT / "build" / "hw"
 NAME = "tune_jam_psu"
 
 sys.path.insert(0, str(ROOT / "hw"))
+SYMBOL_DIRS = ["/usr/share/kicad/symbols", str(ROOT / "hw" / "symbols")]   # 自作の記号（hw/symbols/gen_symbols.py）
+os.environ["KICAD_SYMBOL_DIR"] = ":".join(SYMBOL_DIRS)
+
+
+def remove_sheet_pins(text):
+    """最上位のシートにあるシート記号のピンを消す。
+
+    サブシートの中は global_label（と電源記号）でつながっているので、シートのピンは余計で、
+    KiCad の ERC が hier_label_mismatch を出す。
+    """
+    out, i = [], 0
+    while True:
+        j = text.find("(sheet", i)
+        if j < 0:
+            out.append(text[i:])
+            break
+        out.append(text[i:j])
+        depth, k = 0, j
+        while True:
+            if text[k] == "(":
+                depth += 1
+            elif text[k] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            k += 1
+        block = text[j:k + 1]
+        # ブロックの中の (pin "名前" ...) を取り除く
+        res, m = [], 0
+        while True:
+            p = block.find("(pin ", m)
+            if p < 0:
+                res.append(block[m:])
+                break
+            res.append(block[m:p])
+            d, q = 0, p
+            while True:
+                if block[q] == "(":
+                    d += 1
+                elif block[q] == ")":
+                    d -= 1
+                    if d == 0:
+                        break
+                q += 1
+            m = q + 1
+        out.append("".join(res))
+        i = k + 1
+    return "".join(out)
 
 
 def collect(data, comps, nets, path=""):
@@ -53,8 +101,13 @@ def main():
 
     proj = OUT / NAME
     for sch in proj.glob("*.kicad_sch"):
-        s = sch.read_text()
-        sch.write_text(s.replace("(hierarchical_label ", "(global_label "))
+        s = sch.read_text().replace("(hierarchical_label ", "(global_label ")
+        sch.write_text(remove_sheet_pins(s))
+
+    # 自作の記号ライブラリをプロジェクトに登録する（KiCad の ERC で lib_symbol_issues を出さないため）
+    lib = (ROOT / "hw" / "symbols" / "tune_jam_psu.kicad_sym").resolve()
+    (proj / "sym-lib-table").write_text(
+        f'(sym_lib_table (version 7)\n  (lib (name "tune_jam_psu")(type "KiCad")(uri "{lib}")(options "")(descr ""))\n)\n')
 
     data = json.loads((proj / f"{NAME}.json").read_text())
     comps, nets = {}, {}

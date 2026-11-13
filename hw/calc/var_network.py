@@ -25,7 +25,7 @@ DAC_BITS = 12
 VDDA = 3.3
 
 R1 = 100e3            # VOUT_SENSE → FB
-R2 = 500e3            # FB → GND
+R2 = 499e3            # FB → GND
 RA = 14.7e3           # DAC1 → 分圧点
 RB = 7.5e3            # 分圧点 → GND
 RINJ = 2.7e3          # 分圧点 → INJ スイッチ → FB
