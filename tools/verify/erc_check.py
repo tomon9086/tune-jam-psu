@@ -6,10 +6,13 @@
 許可リスト（hw/erc_waivers.json）の形：
     [{"type": "power_pin_not_driven", "contains": "U1 Pin 2", "reason": "…"}]
 type が一致し、違反の説明か対象の説明に contains の文字列を含む違反を許可する。
+contains の代わりに "regex"（正規表現）も書ける。参照番号（U8 など）は部品を足すと変わるので、
+MCU の未使用ピンのようにピン名で指定したいときに使う。
 error が 1 件でも残れば終了コード 1。warning は表示だけする。
 """
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -27,7 +30,9 @@ def main():
     for sheet in report["sheets"]:
         for v in sheet["violations"]:
             text = v["description"] + " " + " ".join(i["description"] for i in v["items"])
-            w = next((w for w in waivers if w["type"] == v["type"] and w["contains"] in text), None)
+            w = next((w for w in waivers if w["type"] == v["type"] and
+                      ((w.get("contains") and w["contains"] in text) or (w.get("regex") and re.search(w["regex"], text)))),
+                     None)
             label = f'{v["severity"]:7} {v["type"]}: {v["description"]} ' \
                     f'[{"; ".join(i["description"] for i in v["items"])}] ({sheet["path"]})'
             if w:
