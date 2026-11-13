@@ -18,10 +18,16 @@ VDAC1 = 2.097   # Vset 5V
 VDAC2 = 0.867   # Iset 1A（0.2V の下駄 + 0.667V/A × 1A）
 
 VARIANTS = {
-    # 名前: (Ri, Rf, Cf, Rcc)  CC アンプ：反転入力に DAC2 を Ri で入れ、帰還に Rf + Cf（PI）
-    "a_slow": ("10k", "4.7k", "10n", "10k"),
-    "b_mid": ("10k", "10k", "2.2n", "10k"),
-    "c_fast": ("10k", "22k", "1n", "10k"),
+    # 名前: (Ri, Rf, Cf, Rcc, Chold)
+    #   CC アンプ：反転入力に DAC2 を Ri で入れ、帰還に Rf + Cf（PI）
+    #   Chold：ダイオードの後ろ（CC_D）と GND の間のコンデンサ。CC を抜くときに注入をゆっくり減らし、
+    #          降圧 IC の行き過ぎを抑える（かけるときはダイオード経由ですぐ充電される）
+    "a_slow": ("10k", "4.7k", "10n", "10k", None),
+    "b_mid": ("10k", "10k", "2.2n", "10k", None),
+    "c_fast": ("10k", "22k", "1n", "10k", None),
+    "d_mid_h4n7": ("10k", "10k", "2.2n", "10k", "4.7n"),
+    "e_mid_h10n": ("10k", "10k", "2.2n", "10k", "10n"),
+    "f_fast_h10n": ("10k", "22k", "1n", "10k", "10n"),
 }
 
 TEMPLATE = """* CC loop {name}
@@ -77,6 +83,7 @@ BOUT ccout 0 V = max(0.02, min(4.98, V(oa_p)))
 * ダイオード（1N4148W 相当）＋ Rcc で INJ スイッチの手前に注入
 DCC ccout ccd D4148
 RCC ccd inj {rcc}
+{chold}
 .model D4148 D(Is=2.5n N=1.75 Rs=0.6 Cjo=2p)
 .save v(vs) v(bout) i(L1) v(csa) v(ccout) v(fb)
 .tran 10n 2.4m 0 20n uic
@@ -89,10 +96,10 @@ wrdata {name}.txt v(vs) i(L1) v(csa) v(ccout) v(fb)
 
 
 def main():
-    for name, (ri, rf, cf, rcc) in VARIANTS.items():
+    for name, (ri, rf, cf, rcc, chold) in VARIANTS.items():
         (HERE / f"{name}.cir").write_text(TEMPLATE.format(
             name=name, model=MODEL, r1=R1, r2=R2, ra=RA, rb=RB, rinj=RINJ, vdac1=VDAC1, vdac2=VDAC2,
-            ri=ri, rf=rf, cf=cf, rcc=rcc))
+            ri=ri, rf=rf, cf=cf, rcc=rcc, chold=f"CHOLD ccd 0 {chold}" if chold else "* Chold なし"))
         print(name)
 
 
