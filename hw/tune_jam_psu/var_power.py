@@ -85,10 +85,11 @@ def var_power(vin, gnd, v5, vdda, var_out,
     r = R("165k"); r[1] += vdda; r[2] += csp
     op["+INA"] += csp; op["-INA"] += inn
     r = R("10k"); r[1] += dac2; r[2] += inn      # Ri
-    rf, cf, mid = R("4.7k"), C("10n"), Net("CC_FB_MID")   # Rf + Cf（値は sim/cc-loop の結果で決める）
+    rf, cf, mid = R("10k"), C("2.2n"), Net("CC_FB_MID")   # Rf + Cf（sim/cc-loop の d_mid_h4n7 で合格）
     rf[1] += inn; rf[2] += mid; cf[1] += mid; cf[2] += ccout
     op["OUTA"] += ccout
     d = d4148(); d["A"] += ccout; d["K"] += ccd
+    c = C("4.7n"); c[1] += ccd; c[2] += gnd      # Chold：CC を抜くとき注入をゆっくり減らし、出力の行き過ぎを抑える
     r = R("0", lcsc="TODO"); r[1] += ccd; r[2] += Net("CC_D2")   # VAR-06a：CC だけを切り離す 0Ω（DNP 可）
     r2 = R("10k"); r2[1] += Net("CC_D2"); r2[2] += inj           # Rcc
     # MCP6002 の B は使わない：ボルテージフォロアにして入力を GND に
